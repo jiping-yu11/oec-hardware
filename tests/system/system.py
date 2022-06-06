@@ -19,6 +19,8 @@ import sys
 import re
 import argparse
 
+sys.path.append('/usr/share/oech/lib/')
+
 from hwcompatible.test import Test
 from hwcompatible.command import Command
 from hwcompatible.sysinfo import SysInfo
@@ -45,6 +47,7 @@ class SystemTest(Test):
         :return:
         """
         self.args = args or argparse.Namespace()
+        #self.logpath = os.path.dirname(os.path.realpath(__file__)) + "/system.log"
         self.logpath = getattr(args, "logdir", None) + "/system.log"
 
     def test(self):
@@ -117,7 +120,7 @@ class SystemTest(Test):
                 print("Error: kernel %s check GA status fail." %
                       self.sysinfo.kernel_version)
                 return_code = False
-        except Exception:
+        except Exception as error:
             print("Error: %s is not supported." % os_version)
             return_code = False
 
@@ -331,6 +334,13 @@ class SystemTest(Test):
             print("SElinux is enforcing as expect.")
             return True
         else:
+            print('status: ' + str(status))
+            print('mode: ' + str(mode))
             print("SElinux is not enforcing, expect is enforcing.")
             os.system("/usr/sbin/sestatus")
             return False
+
+if __name__ == "__main__":
+    main = SystemTest()
+    main.setup()
+    main.test()
