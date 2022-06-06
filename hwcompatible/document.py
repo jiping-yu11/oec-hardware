@@ -153,13 +153,13 @@ class CertDocument(Document):
         """
         Get server information
         """
-        return self.document['server']
+        return self.document['SERVER']
 
     def get_url(self):
         """
         Get url
         """
-        return self.document['Product URL']
+        return self.document['PRODUCTURL']
 
     def get_certify(self):
         """
@@ -171,7 +171,7 @@ class CertDocument(Document):
         """
         Get kernel information
         """
-        return self.document['kernel']
+        return self.document['KERNEL']
 
 
 class DeviceDocument(Document):
