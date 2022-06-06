@@ -15,6 +15,7 @@
 """Document processing"""
 
 import json
+import os
 from .commandUI import CommandUI
 from .command import Command
 from .device import Device
@@ -64,6 +65,7 @@ class CertDocument(Document):
 
     def __init__(self, filename, document=''):
         self.document = dict()
+        print(filename)
         self.filename = filename
         if not document:
             self.load()
@@ -75,9 +77,11 @@ class CertDocument(Document):
         new document object
         """
         try:
-            pipe = Command("/usr/sbin/dmidecode -t 1")
+            #pipe = Command("/usr/sbin/dmidecode -t 1")
+            pipe = Command("/usr/sbin/lshw | head -n 8")
             pipe.start()
-            self.document = dict()
+
+            #self.document = dict()
             while True:
                 line = pipe.readline()
                 if not line:
@@ -87,57 +91,87 @@ class CertDocument(Document):
                     continue
                 key = property_right[0].strip()
                 value = property_right[1].strip()
-                if key in ["Manufacturer", "Product Name", "Version"]:
+                if key in ["vendor", "product", "description"]:
+                #if key in ["Manufacturer", "Product Name", "Version"]:
                     self.document[key] = value
         except Exception as concrete_error:
             print("Error: get hardware info fail.\n", concrete_error)
 
         sysinfo = SysInfo(CertEnv.releasefile)
-        self.document[OS] = sysinfo.product + " " + sysinfo.get_version()
-        self.document[KERNEL] = sysinfo.kernel
-        self.document[ID] = CommandUI().prompt(
+        self.document['OS'] = sysinfo.product + " " + sysinfo.get_version()
+        self.document['KERNEL'] = sysinfo.kernel
+        self.document['ID'] = CommandUI().prompt(
             "Please provide your Compatibility Test ID:")
-        self.document[PRODUCTURL] = CommandUI().prompt(
+        self.document['PRODUCTURL'] = CommandUI().prompt(
             "Please provide your Product URL:")
-        self.document[SERVER] = CommandUI().prompt("Please provide the Compatibility Test "
+        self.document['SERVER'] = CommandUI().prompt("Please provide the Compatibility Test "
                                                    "Server (Hostname or Ipaddr):")
 
     def get_hardware(self):
         """
         Get hardware information
         """
-        return self.document["Manufacturer"] + " " + self.document["Product Name"] + " " \
-            + self.document["Version"]
+        ##return self.document["Manufacturer"] + " " + self.document["Product Name"] + " " \
+        ##    + self.document["Version"]
+        ##return "PPC64LE" + " " + "CentOS Stream8" + " " + "22.5.2-1.el8"
+        #self.new()
+        #print(str(self.document))
+        """ 
+        try:
+            pipe = Command("/usr/sbin/lshw | head -n 8")
+            pipe.start()
+
+            #self.document = dict()
+            while True:
+                line = pipe.readline()
+                if not line:
+                    break
+                property_right = line.split(":", 1)
+                if len(property_right) != 2:
+                    continue
+                key = property_right[0].strip()
+                value = property_right[1].strip()
+                if key in ["vendor", "product", "description"]:
+                #if key in ["Manufacturer", "Product Name", "Version"]:
+                    self.document[key] = value
+        except Exception as concrete_error:
+            print("Error: get hardware info fail.\n", concrete_error)
+        
+        self.save()
+        """
+        return self.document["vendor"] + " " + self.document["product"] + " " + self.document["description"]
+        self.document['OS'] = sysinfo.product + " " + sysinfo.get_version()
+        self.document['KERNEL'] = sysinfo.kernel
 
     def get_os(self):
         """
         Get os information
         """
-        return self.document[OS]
+        return self.document['OS']
 
     def get_server(self):
         """
         Get server information
         """
-        return self.document[SERVER]
+        return self.document['server']
 
     def get_url(self):
         """
         Get url
         """
-        return self.document[PRODUCTURL]
+        return self.document['Product URL']
 
     def get_certify(self):
         """
         Get certify
         """
-        return self.document[ID]
+        return self.document['ID']
 
     def get_kernel(self):
         """
         Get kernel information
         """
-        return self.document[KERNEL]
+        return self.document['kernel']
 
 
 class DeviceDocument(Document):

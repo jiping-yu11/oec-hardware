@@ -50,11 +50,18 @@ class SysInfo:
             return
 
         if text:
-            pattern = re.compile(r'NAME="(\w+)"')
-            results = pattern.findall(text)
-            self.product = results[0].strip() if results else ""
+            #pattern = re.compile(r'NAME="(\w+)"')
+            pattern = re.compile('.*NAME="([^>]+)".*')
+            #results = pattern.findall(text)
+            for line in text.split('\n'):
+                if pattern.match(line):
+                    myMatch = pattern.match(line)
+                    break
+            self.product = myMatch.group(1)
+            #self.product = results[0].strip() if results else ""
 
             pattern = re.compile(r'VERSION="(.+)"')
+            #pattern = re.compile(r'PRETTY NAME="(\w+)"')
             results = pattern.findall(text)
             self.version = results[0].strip() if results else ""
 
