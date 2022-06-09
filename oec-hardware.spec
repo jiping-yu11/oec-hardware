@@ -15,8 +15,8 @@ Source0:        %{name}-%{version}.tar.bz2
 
 Buildroot:      %{_tmppath}/%{name}-%{version}-root
 BuildRequires:  gcc
-Requires:       kernel-devel, kernel-headers, dmidecode, tar
-Requires:       qperf, fio, memtester
+Requires:       kernel-devel, kernel-headers, tar
+Requires:       qperf, fio
 Requires:       kernel >= 4
 Requires:       python3
 
