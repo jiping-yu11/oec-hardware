@@ -18,6 +18,7 @@ import os
 import re
 import argparse
 
+from builtins import input
 from hwcompatible.command import Command
 from hwcompatible.document import CertDocument
 from hwcompatible.env import CertEnv
@@ -33,8 +34,7 @@ class RDMATest(NetworkTest):
         self.args = None
         self.cert = None
         self.device = None
-        self.requirements = ['ethtool', 'iproute', 'psmisc', 'qperf',
-                             'perftest', 'opensm', 'infiniband-diags',
+        self.requirements = ['perftest', 'opensm', 'infiniband-diags',
                              'librdmacm-utils', 'libibverbs-utils']
         self.subtests = [self.test_ibstatus, self.test_icmp, self.test_rdma]
         self.interface = None
@@ -237,16 +237,8 @@ class RDMATest(NetworkTest):
         test case
         :return:
         """
-        try:
-            input = raw_input
-        except NameError:
-            from builtins import input
-
         message = "Please enter the IP of InfiniBand interface on remote server: \
                    (default %s)\n> " % self.server_ip
         self.server_ip = input(message) or self.server_ip
-
-        for subtest in self.subtests:
-            if not subtest():
-                return False
-        return True
+        
+        return self.tests()

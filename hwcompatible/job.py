@@ -109,9 +109,10 @@ class Job():
         for test in self.test_factory:
             if test[RUN]:
                 testclass = self.discover(test[NAME], subtests_filter)
-                if not testclass and not subtests_filter:
-                    test[STATUS] = FAIL
-                    print("not found %s" % test[NAME])
+                if not testclass:
+                    if not subtests_filter:
+                        test[STATUS] = FAIL
+                        print("not found %s" % test[NAME])
                     continue
                 testcase = dict()
                 testcase[TEST] = testclass
@@ -181,7 +182,7 @@ class Job():
                 print("Start to run %s/%s test suite: %s." %
                       (CURRENT_NUM, TOTAL_COUNT, name))
                 args = argparse.Namespace(
-                    device=testcase[DEVICE], logdir=logger.log.dir)
+                    device=testcase[DEVICE], logdir=logger.log.dir, testname=name)
                 test.setup(args)
                 if test.reboot:
                     reboot = Reboot(testcase[NAME], self, test.rebootup)
