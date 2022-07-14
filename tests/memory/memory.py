@@ -46,7 +46,7 @@ class MemoryTest(Test):
         :return:
         """
         self.args = args or argparse.Namespace()
-        self.logpath = getattr(args, "logdir", "./") + "/memory.log"
+        self.logpath = getattr(args, "logdir", None) + "/memory.log"
         self.get_memory()
 
     def test(self):
@@ -62,8 +62,10 @@ class MemoryTest(Test):
 
         if not self.hugetlb_test():
             return False
+
         if not self.memory_hotplug():
             return False
+
         return True
 
     def get_memory(self):
@@ -225,12 +227,13 @@ class MemoryTest(Test):
 
         self.get_memory()
         total_mem_2 = self.system_memory
-        if total_mem_2 > total_mem_1:
+        if total_mem_2 >= total_mem_1:
             return False
 
         os.system("echo 'Try to online...' &>> %s"%self.logpath)
         if not self.online_memory(memory_path):
             self.retry_list.append(memory_path)
+            return False
         self.get_memory()
         total_mem_3 = self.system_memory
         if total_mem_3 != total_mem_1:
@@ -258,17 +261,13 @@ class MemoryTest(Test):
         :param memory_path:
         :return:
         """
-        try:    
+        try:
             Command("echo 0 > %s/online" % memory_path).run()
             Command("cat %s/state" % memory_path).get_str("offline")
             return True
         except Exception:
-            try:
-                Command("cat %s/removable" % memory_path).get_str("0")
-                return True
-            except:
-                print("Error: fail to offline %s." % memory_path)
-                return False
+            print("Error: fail to online %s." % memory_path)
+            return False
 
     def memory_hotplug(self):
         """
@@ -307,8 +306,8 @@ class MemoryTest(Test):
                 continue
             if not self.hotplug_memory_test(memory_path):
                 print("%s hotplug test fail." % os.path.basename(memory_path))
-                self.retry_list.append(memory_path)
-        
+                return_code = False
+
         if test_flag == 0:
             print("No removable memory found.")
 
@@ -316,9 +315,8 @@ class MemoryTest(Test):
             print("Retry to online memory after 2mins.")
             time.sleep(120)
             for memory_path in self.retry_list:
-                if not self.hotplug_memory_test(memory_path):
-                    print("Retry %s hotplug test fail." % os.path.basename(memory_path))
-                    return_code = False
+                self.online_memory(memory_path)
+
         return return_code
 
 
